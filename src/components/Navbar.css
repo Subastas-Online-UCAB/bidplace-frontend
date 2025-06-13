@@ -1,0 +1,49 @@
+.custom-navbar {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .custom-navbar .navbar-brand {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #f8f9fa;
+  }
+  
+  .custom-navbar .nav-link {
+    font-size: 1.1rem;
+    margin-left: 15px;
+    color: #f8f9fa !important;
+    transition: color 0.3s ease;
+  }
+  
+  .custom-navbar .nav-link:hover {
+    color: #adb5bd !important;
+  }
+  
+  .custom-navbar .search-form input {
+    border-radius: 20px;
+  }
+  
+  .custom-navbar .btn-outline-light {
+    border-radius: 20px;
+  }
+  
+  .custom-navbar .social-icons .nav-link {
+    color: #f8f9fa !important;
+    font-size: 1.2rem;
+    margin-left: 10px;
+    transition: color 0.3s ease;
+  }
+  
+  .custom-navbar .social-icons .nav-link:hover {
+    color: #adb5bd !important;
+  }
+
+  /* Navbar.css */
+.custom-navbar .dropdown-toggle .rounded-circle {
+  object-fit: cover;
+  border: 1px solid #ccc;
+}
+
+.object-fit-cover {
+  object-fit: cover;
+}

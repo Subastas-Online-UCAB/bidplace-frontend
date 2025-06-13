@@ -1,0 +1,78 @@
+/* Estilos generales para el formulario de registro */
+.register-card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 30px 20px; /* Reducido el padding lateral */
+  border: 1px solid #dee2e6;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+/* Etiquetas del formulario */
+.label {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #343a40;
+  margin-bottom: 6px;
+  text-align: left;
+}
+
+/* Campos de entrada */
+.input-field {
+  border-radius: 6px;
+  border: 1px solid #ced4da;
+  padding: 12px 14px;
+  font-size: 0.95rem;
+  transition: border-color 0.3s ease;
+  width: 100%;
+  min-width: 100%; /* Asegura que se estiren completamente */
+}
+
+.input-field:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.15);
+  outline: none;
+}
+
+/* Botón de registro */
+.button {
+  background-color: #007bff;
+  color: white;
+  border-radius: 6px;
+  padding: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  transition: background-color 0.3s ease;
+}
+
+.button:hover {
+  background-color: #0056b3;
+}
+
+/* Texto inferior con link */
+.text-center {
+  font-size: 0.9rem;
+  color: #495057;
+}
+
+.text-center a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.text-center a:hover {
+  text-decoration: underline;
+}
+
+/* Responsive para pantallas pequeñas */
+@media (max-width: 768px) {
+  .register-card {
+    padding: 20px;
+  }
+
+  .button {
+    font-size: 0.95rem;
+    padding: 10px;
+  }
+}

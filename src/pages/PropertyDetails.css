@@ -1,0 +1,325 @@
+.property-details-container {
+  padding: 40px;
+  max-width: 1400px;
+  margin: 0 auto;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.property-title {
+  font-size: 38px;
+  font-weight: bold;
+  margin-top: 10px;
+  margin-bottom: 30px;
+  text-align: left;
+  color: #1f2937;
+  padding-left: 10px;
+}
+
+.property-details-content {
+  display: flex;
+  gap: 40px;
+  align-items: flex-start;
+  margin-top: 20px;
+}
+
+.property-details-left {
+  flex: 1.5;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.property-details-image {
+  width: 100%;
+  height: 700px;
+  object-fit: cover;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.more-info-button {
+  margin-top: 25px;
+  padding: 12px 20px;
+  font-size: 16px;
+  background-color: #1d4ed8;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.more-info-button:hover {
+  background-color: #2563eb;
+}
+
+.property-details-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.current-bid-box,
+.config-modal {
+  background-color: #f9fafb;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  position: relative;
+}
+
+.current-bid-box h2 {
+  margin-bottom: 15px;
+  font-size: 22px;
+  color: #111827;
+}
+
+.amount {
+  font-size: 28px;
+  font-weight: bold;
+  color: #059669;
+  margin-bottom: 20px;
+}
+
+.details-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-size: 15px;
+}
+
+.input-field {
+  width: 100%;
+  padding: 10px 14px;
+  margin: 12px 0;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.submit-button {
+  width: 100%;
+  padding: 12px;
+  background-color: #10b981;
+  color: white;
+  border: none;
+  font-size: 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.submit-button:hover {
+  background-color: #059669;
+}
+
+/* Engranaje dentro del cuadro */
+.gear-icon {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  font-size: 22px;
+  cursor: pointer;
+  color: #6b7280;
+  transition: color 0.3s ease;
+}
+
+.gear-icon:hover {
+  color: #111827;
+}
+
+/* Modal Overlay (fondo que oscurece la página) */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6); /* Oscurecer fondo */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+/* Modal Content (carta del modal de más informacion) */
+.modal-content {
+  background-color: white !important;
+  padding: 30px;
+  border-radius: 12px !important;
+  width: 90%;
+  max-width: 800px;
+  position: relative;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important; /* Sombra para que se vea más elevado */
+  box-sizing: border-box; /* Asegura que el padding no rompa el layout */
+}
+
+/* Modal Content (carta del modal de puja automatica) */
+.modal-content2 {
+  background-color: white !important;
+  padding: 30px;
+  border-radius: 12px !important;
+  width: 90%;
+  max-width: 500px;
+  position: relative;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important; /* Sombra para que se vea más elevado */
+  box-sizing: border-box; /* Asegura que el padding no rompa el layout */
+}
+
+/* Modal Close Button (botón de cerrar) */
+.modal-close {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  background: none;
+  border: none;
+  font-size: 26px;
+  cursor: pointer;
+  color: #9ca3af;
+}
+
+/* Ajustes al título y contenido del modal */
+.modal-content h2 {
+  margin-bottom: 20px;
+  font-size: 24px;
+  color: #333; /* Asegurar color legible */
+}
+
+.modal-content p {
+  margin-bottom: 12px;
+  font-size: 16px;
+  line-height: 1.5; /* Mejor legibilidad */
+}
+
+/* Modal de Puja Automática */
+.config-modal {
+  background-color: #ffffff !important;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 0px 0px rgba(0, 0, 0, 0.05) !important;
+  position: relative;
+  max-width: 500px;
+  margin: 0 auto; /* Centrar */
+}
+
+.config-modal h3 {
+  font-size: 20px;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.config-modal input {
+  width: calc(100% - 20px); /* Asegura que no se pase del límite */
+  padding: 10px 14px;
+  margin: 12px 0;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.config-modal button {
+  width: 100%;
+  padding: 12px;
+  background-color: #10b981;
+  color: white;
+  border: none;
+  font-size: 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.config-modal button:hover {
+  background-color: #059669;
+}
+
+/* Corregir tamaño del modal de Puja Automática */
+.modal-content .config-modal {
+  padding: 30px;
+}
+
+/* Nuevo Modal de Subasta */
+.modal-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30px;
+}
+
+/* Contenedor de la imagen */
+.modal-image-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+/* Imagen de la subasta */
+.modal-image {
+  width: 80%;
+  max-width: 500px;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  margin-bottom: 30px; /* Separar imagen de la información */
+}
+
+/* Contenedor de la información */
+.modal-info-container {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  gap: 40px;
+}
+
+/* Información de la izquierda (título y descripción) */
+.modal-info-left {
+  flex: 1;
+  font-size: 16px;
+  color: #333;
+}
+
+.modal-subasta-title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #1f2937;
+}
+
+.modal-subasta-description {
+  font-size: 16px;
+  color: #555;
+  margin-top: 10px;
+}
+
+/* Información de la derecha (detalles adicionales) */
+.modal-info-right {
+  flex: 1;
+  font-size: 14px;
+  color: #333;
+}
+
+.modal-info-right p {
+  margin-bottom: 10px;
+}
+
+
+.thumbnail-container {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.thumbnail-image {
+  width: 100px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.2s ease, border 0.2s ease;
+  border: 2px solid transparent;
+}
+
+.thumbnail-image:hover {
+  transform: scale(1.05);
+  border: 2px solid #3b82f6;
+}

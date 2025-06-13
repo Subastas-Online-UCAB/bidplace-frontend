@@ -1,0 +1,142 @@
+.hero-section {
+  text-align: center;
+  padding: 80px 0;
+  background-color: #f4f4f4;
+}
+
+.hero-content {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.hero-text {
+  flex: 1;
+  min-width: 300px;
+  text-align: left;
+}
+
+.static-title {
+  font-size: 4rem;
+  font-weight: bold;
+  z-index: 1;
+  position: relative;
+  margin: 0 30px;
+}
+
+.image-slider-floating.right {
+  flex: 1;
+  min-width: 300px;
+  text-align: right;
+  padding: 10px;
+}
+
+.slider-image-floating {
+  width: 360px; /* 100% más grande que el original */
+  border-radius: 12px;
+  transition: opacity 0.5s ease-in-out;
+}
+
+.fade-in {
+  opacity: 1;
+}
+
+.fade-out {
+  opacity: 0;
+}
+
+.floating {
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+.subasta-carousel-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+.subasta-carousel {
+  display: flex;
+  overflow: hidden;
+}
+
+.property-card {
+  margin: 10px;
+  width: 300px;
+}
+
+.arrow {
+  background: none;
+  border: none;
+  font-size: 30px;
+  cursor: pointer;
+}
+
+.arrow.left {
+  margin-right: 10px;
+}
+
+.arrow.right {
+  margin-left: 10px;
+}
+
+/* Añadir espacio entre las secciones Colecciones, Ganadores y Por qué Bidplace */
+.section-gap {
+  margin-top: 80px;
+  margin-bottom: 80px;
+}
+
+@media (max-width: 768px) {
+  .hero-content {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .hero-text {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .image-slider-floating.right {
+    text-align: center;
+  }
+}
+
+.testimonial-img {
+  width: 120px !important;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.collection-image {
+ 
+}
+
+.collection-image:hover {
+  opacity: 1;
+}
+
+.seccion-espaciada {
+  margin-top: 80px;
+  margin-bottom: 80px;
+}
+
+.section-spacing { /* este es el espacio entre ganadores y por que bidplace */
+  margin-top: 10vh;
+  margin-bottom: 10vh;
+}
+.section-spacing2 { /*  Y este es el espacio de colecciones y ganadores el margin bottom es el que hay que tocar de ambos */
+  margin-top: 10vh;
+  margin-bottom: 2vh;
+}
+
