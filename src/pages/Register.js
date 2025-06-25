@@ -180,7 +180,7 @@ const Register = () => {
                 </Button>
 
                 <div className="text-center mt-3">
-                  ¿Ya tienes cuenta? <Link to="/login">Inicia sesión</Link>
+                  ¿Ya tienes cuenta? <Link to="/Inicio">Inicia sesión</Link>
                 </div>
               </Form>
             </Card.Body>
