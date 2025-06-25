@@ -15,6 +15,8 @@ const Cuenta = () => {
   const [loading, setLoading] = useState(true);
   const [guardando, setGuardando] = useState(false);
   const [mensaje, setMensaje] = useState('');
+  const [guardandoPwd, setGuardandoPwd] = useState(false);
+  const [mensajePwd, setMensajePwd] = useState('');
 
   const email = keycloak?.tokenParsed?.email;
 
@@ -70,6 +72,31 @@ const Cuenta = () => {
       setMensaje('Hubo un error al actualizar.');
     } finally {
       setGuardando(false);
+    }
+  };
+
+  const handlePasswordReset = async () => {
+    setGuardandoPwd(true);
+    setMensajePwd('');
+
+    try {
+      await axios.post(
+  "http://localhost:5118/usuarios/api/User/reset-password",
+  JSON.stringify(usuario.email), // 🔥 Enviar como string plano
+  {
+    headers: {
+      Authorization: `Bearer ${keycloak.token}`,
+      'Content-Type': 'application/json'
+    }
+  }
+);
+
+      setMensajePwd("Se ha enviado un correo para restablecer la contraseña.");
+    } catch (error) {
+      console.error("Error al solicitar reset:", error);
+      setMensajePwd("Hubo un error al enviar el correo.");
+    } finally {
+      setGuardandoPwd(false);
     }
   };
 
@@ -153,6 +180,18 @@ const Cuenta = () => {
           </Button>
         </div>
       </Form>
+
+      <div className="text-center mt-4">
+        <Button
+          variant="outline-secondary"
+          onClick={handlePasswordReset}
+          disabled={guardandoPwd}
+        >
+          {guardandoPwd ? 'Enviando...' : 'Cambiar contraseña'}
+        </Button>
+
+        {mensajePwd && <Alert className="mt-3" variant="info">{mensajePwd}</Alert>}
+      </div>
     </Container>
   );
 };
