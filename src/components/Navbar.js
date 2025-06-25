@@ -24,9 +24,9 @@ const NavigationBar = () => {
   });
 
   // Verificamos si el usuario tiene ciertos roles desde el token de Keycloak
-  const isPostor = keycloak?.tokenParsed?.realm_access?.roles?.includes("postor");
+  const isPostor = keycloak?.tokenParsed?.realm_access?.roles?.includes("Postor");
   const isSubastador = keycloak?.tokenParsed?.realm_access?.roles?.includes("subastador");
-  const isAdmin = keycloak?.tokenParsed?.realm_access?.roles?.includes("administrador");
+  const isAdmin = keycloak?.tokenParsed?.realm_access?.roles?.includes("Administrador");
 
   // Usamos useEffect para actualizar el nombre del usuario al cargar el componente
   useEffect(() => {

@@ -17,6 +17,7 @@ import Producto from './pages/Producto';
 import InterAdmin from './pages/InterAdmin';
 import Logout from './pages/Logout';
 import Inicio from './pages/inicio';
+import Cuenta from './pages/Cuenta';
 
 import keycloak, { initKeycloak } from './auth';
 
@@ -51,6 +52,8 @@ function App() {
               <Route path="/admin" element={authenticated ? <InterAdmin /> : <Navigate to="/" />} />
               <Route path="/logout" element={<Logout />} />
               <Route path="/inicio" element={authenticated ? <Navigate to="/home" /> : <Inicio />} />
+              <Route path="/cuenta" element={<Cuenta />} />
+
             </Routes>
           </main>
         </div>
