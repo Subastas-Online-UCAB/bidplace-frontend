@@ -11,7 +11,7 @@ const CrearSubasta = () => {
     nombre: '',
     descripcion: '',
     precioBase: '',
-    duracion: '',
+    duracion: '', // en días
     condicionParticipacion: '',
     fechaInicio: '',
     incrementoMinimo: '',
@@ -19,7 +19,7 @@ const CrearSubasta = () => {
     tipoSubasta: '',
     idUsuario: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
     estado: 'Pendiente',
-    idProducto: '123456789'
+    idProducto: ''
   });
 
   const [productosDisponibles] = useState([
@@ -42,30 +42,47 @@ const CrearSubasta = () => {
     setShowModal(false);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      await axios.post(
-        'http://localhost:5118/subastas/api/Subastas',
-        {
-          ...formData,
-          precioBase: parseFloat(formData.precioBase),
-          incrementoMinimo: parseFloat(formData.incrementoMinimo),
-          precioReserva: parseFloat(formData.precioReserva),
-          fechaInicio: new Date(formData.fechaInicio).toISOString()
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${keycloak.token}`
-          }
-        }
-      );
-      setSuccess(true);
-      setTimeout(() => navigate('/'), 1500);
-    } catch (err) {
-      setError('Ocurrió un error al crear la subasta.');
-    }
+  const convertirDiasADuracion = (dias) => {
+    const horas = parseFloat(dias) * 24;
+    return `${Math.floor(horas).toString().padStart(2, '0')}:00:00`;
   };
+
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  const duracionDias = parseInt(formData.duracion, 10);
+  const duracionTimeSpan = `${duracionDias}.00:00:00`;
+
+  console.log("Payload enviado:");
+  console.log(JSON.stringify({ ...formData, duracion: duracionTimeSpan }, null, 2));
+
+  try {
+    await axios.post(
+      'http://localhost:5118/subastas/api/Subastas',
+      {
+        ...formData,
+        precioBase: parseFloat(formData.precioBase),
+        incrementoMinimo: parseFloat(formData.incrementoMinimo),
+        precioReserva: parseFloat(formData.precioReserva),
+        fechaInicio: new Date(formData.fechaInicio).toISOString(),
+        duracion: duracionTimeSpan
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${keycloak.token}`
+        }
+      }
+    );
+
+    setSuccess(true);
+    setTimeout(() => navigate('/'), 1500);
+  } catch (err) {
+    console.error(err);
+    setError('Ocurrió un error al crear la subasta.');
+  }
+};
+
 
   return (
     <Container className="pt-5 mt-5 mb-5">
@@ -92,7 +109,7 @@ const CrearSubasta = () => {
           </Col>
           <Col md={6}>
             <Form.Label>Precio Reserva</Form.Label>
-            <Form.Control name="precioReserva" type="number" value={formData.precioReserva} onChange={handleChange} required />
+            <Form.Control name="precioReserva" type="number" value={formData.precioReserva} onChange={handleChange} />
           </Col>
         </Row>
 
@@ -103,7 +120,7 @@ const CrearSubasta = () => {
           </Col>
           <Col md={6}>
             <Form.Label>Duración (días)</Form.Label>
-            <Form.Control name="duracion" value={formData.duracion} onChange={handleChange} required />
+            <Form.Control name="duracion" type="number" value={formData.duracion} onChange={handleChange} required />
           </Col>
         </Row>
 
