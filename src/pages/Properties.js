@@ -14,9 +14,9 @@ const categories = [
 const statuses = ['Todas', 'Activa', 'Finalizada', 'Pendiente'];
 
 const statusColors = {
-  Activa: 'success',
+  Activa: 'Active',
   Finalizada: 'secondary',
-  Pendiente: 'warning'
+  Pendiente: 'Pending'
 };
 
 const SubastasVistaGeneral = () => {
@@ -27,8 +27,13 @@ const SubastasVistaGeneral = () => {
   const [subastas, setSubastas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [esSubastador, setEsSubastador] = useState(false);
 
   useEffect(() => {
+    // Verificar si el usuario tiene el rol "Subastador"
+    const roles = keycloak.tokenParsed?.realm_access?.roles || [];
+    setEsSubastador(roles.includes('subastador'));
+
     const fetchSubastas = async () => {
       try {
         const response = await axios.get(
@@ -114,6 +119,7 @@ const SubastasVistaGeneral = () => {
           <p className="text-muted">Explora las mejores oportunidades en subastas exclusivas</p>
         </Col>
         <Col md={4} className="text-end">
+        {esSubastador && (
           <Button 
             variant="primary" 
             onClick={() => navigate('/crear-subasta')}
@@ -121,8 +127,10 @@ const SubastasVistaGeneral = () => {
           >
             <i className="bi bi-plus-lg me-2"></i>Crear Subasta
           </Button>
+        )}
         </Col>
       </Row>
+
 
       {/* Filtros */}
       <Card className="mb-4 filter-card">
