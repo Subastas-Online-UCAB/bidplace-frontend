@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Form, Button, Modal, Alert } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -17,7 +17,7 @@ const CrearSubasta = () => {
     incrementoMinimo: '',
     precioReserva: '',
     tipoSubasta: '',
-    idUsuario: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+    idUsuario: '', // se asigna dinámicamente
     estado: 'Pendiente',
     idProducto: ''
   });
@@ -32,6 +32,29 @@ const CrearSubasta = () => {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
 
+  // Obtener el ID del usuario desde el backend por email
+  useEffect(() => {
+    const fetchUserId = async () => {
+      try {
+        const email = keycloak.tokenParsed?.email;
+        if (!email) throw new Error("No se encontró el email en el token");
+
+        const response = await axios.get(`http://localhost:5118/usuarios/api/User/by-email?email=${email}`, {
+          headers: {
+            Authorization: `Bearer ${keycloak.token}`
+          }
+        });
+
+        setFormData(prev => ({ ...prev, idUsuario: response.data.id }));
+      } catch (err) {
+        console.error("Error al obtener el ID del usuario:", err);
+        setError('No se pudo obtener el usuario autenticado.');
+      }
+    };
+
+    fetchUserId();
+  }, []);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -42,47 +65,38 @@ const CrearSubasta = () => {
     setShowModal(false);
   };
 
-  const convertirDiasADuracion = (dias) => {
-    const horas = parseFloat(dias) * 24;
-    return `${Math.floor(horas).toString().padStart(2, '0')}:00:00`;
-  };
-
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  const duracionDias = parseInt(formData.duracion, 10);
-  const duracionTimeSpan = `${duracionDias}.00:00:00`;
+    const duracionDias = parseInt(formData.duracion, 10);
+    const duracionTimeSpan = `${duracionDias}.00:00:00`;
 
-  console.log("Payload enviado:");
-  console.log(JSON.stringify({ ...formData, duracion: duracionTimeSpan }, null, 2));
-
-  try {
-    await axios.post(
-      'http://localhost:5118/subastas/api/Subastas',
-      {
-        ...formData,
-        precioBase: parseFloat(formData.precioBase),
-        incrementoMinimo: parseFloat(formData.incrementoMinimo),
-        precioReserva: parseFloat(formData.precioReserva),
-        fechaInicio: new Date(formData.fechaInicio).toISOString(),
-        duracion: duracionTimeSpan
-      },
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${keycloak.token}`
+    try {
+      await axios.post(
+        'http://localhost:5118/subastas/api/Subastas',
+        {
+          ...formData,
+          precioBase: parseFloat(formData.precioBase),
+          incrementoMinimo: parseFloat(formData.incrementoMinimo),
+          precioReserva: parseFloat(formData.precioReserva),
+          fechaInicio: new Date(formData.fechaInicio).toISOString(),
+          duracion: duracionTimeSpan
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${keycloak.token}`
+          }
         }
-      }
-    );
+      );
 
-    setSuccess(true);
-    setTimeout(() => navigate('/'), 1500);
-  } catch (err) {
-    console.error(err);
-    setError('Ocurrió un error al crear la subasta.');
-  }
-};
-
+      setSuccess(true);
+      setTimeout(() => navigate('/'), 1500);
+    } catch (err) {
+      console.error(err);
+      setError('Ocurrió un error al crear la subasta.');
+    }
+  };
 
   return (
     <Container className="pt-5 mt-5 mb-5">
@@ -147,7 +161,7 @@ const CrearSubasta = () => {
           </Button>
         </Form.Group>
 
-        <Button type="submit" variant="success">Crear Subasta</Button>
+        <Button type="submit" variant="success" disabled={!formData.idUsuario}>Crear Subasta</Button>
       </Form>
 
       <Modal show={showModal} onHide={() => setShowModal(false)}>

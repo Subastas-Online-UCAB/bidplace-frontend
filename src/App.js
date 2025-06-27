@@ -18,6 +18,8 @@ import InterAdmin from './pages/InterAdmin';
 import Logout from './pages/Logout';
 import Inicio from './pages/inicio';
 import Cuenta from './pages/Cuenta';
+import ProtectedRoute from './components/ProtectedRoute';
+
 
 import keycloak, { initKeycloak } from './auth';
 
