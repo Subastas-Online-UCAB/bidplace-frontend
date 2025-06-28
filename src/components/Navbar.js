@@ -116,6 +116,9 @@ const NavigationBar = () => {
                 {isAdmin && (
                   <Dropdown.Item as={Link} to="/admin">Gestionar roles y permisos</Dropdown.Item>
                 )}
+                {isSubastador && (
+                  <Dropdown.Item as={Link} to="/mis-subastas">Gestionar mis subastas</Dropdown.Item>
+                )}
 
                 <Dropdown.Divider />
                 

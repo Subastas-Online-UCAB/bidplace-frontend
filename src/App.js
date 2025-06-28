@@ -18,6 +18,8 @@ import InterAdmin from './pages/InterAdmin';
 import Logout from './pages/Logout';
 import Inicio from './pages/inicio';
 import Cuenta from './pages/Cuenta';
+import MisSubastas from './pages/MisSubastas'
+import EditarSubasta from './pages/EditarSubasta'
 import ProtectedRoute from './components/ProtectedRoute';
 
 
@@ -55,6 +57,8 @@ function App() {
               <Route path="/logout" element={<Logout />} />
               <Route path="/inicio" element={authenticated ? <Navigate to="/home" /> : <Inicio />} />
               <Route path="/cuenta" element={<Cuenta />} />
+              <Route path="/editar-subasta/:id" element={<EditarSubasta />} />
+              <Route path="/mis-subastas" element={<MisSubastas />} />
 
             </Routes>
           </main>
