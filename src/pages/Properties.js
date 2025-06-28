@@ -11,11 +11,18 @@ const categories = [
   'Hogar y jardín', 'Juguetes y juegos'
 ];
 
-const statuses = ['Todas', 'Activa', 'Finalizada', 'Pendiente'];
+const statuses = ['Todas', 'Active', 'Finalizada', 'Pending', 'Canceled'];
 
 const statusColors = {
   Activa: 'Active',
-  Finalizada: 'secondary',
+  Finalizada: 'Completed',
+  Pendiente: 'Pending',
+  Canceladas: 'Canceled'
+};
+
+const statusTranslation = {
+  Activa: 'Active',
+  Finalizada: 'Completed',
   Pendiente: 'Pending'
 };
 
@@ -61,7 +68,7 @@ const SubastasVistaGeneral = () => {
 
   // Mapear los datos de la API al formato esperado por el componente
   const mappedSubastas = subastas.map(subasta => ({
-    id: subasta.id,
+    id: subasta.idSubasta,
     title: subasta.nombre,
     description: subasta.descripcion,
     category: subasta.tipoSubasta,
@@ -73,7 +80,8 @@ const SubastasVistaGeneral = () => {
 
   const filteredProperties = mappedSubastas.filter((property) => {
     if (!property) return false;
-    
+    //console.log("ID que se pasa al botón:", property.id)
+
     const categoryMatch = selectedCategory === 'Todas' || property.category === selectedCategory;
     const searchMatch = 
       property.title?.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -109,7 +117,7 @@ const SubastasVistaGeneral = () => {
       </Container>
     );
   }
-
+ 
   return (
     <Container className="mt-5 pt-5"> {/* Añadido margen superior */}
       {/* Header con título y botón */}
@@ -237,7 +245,9 @@ const SubastasVistaGeneral = () => {
                         to={`/properties/${property.id}`} 
                         variant="outline-primary"
                         className="view-btn"
+                        
                       >
+                        
                         <i className="bi bi-eye me-2"></i>Ver detalles
                       </Button>
                     </div>
