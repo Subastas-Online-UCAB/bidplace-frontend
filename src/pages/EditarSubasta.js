@@ -4,6 +4,12 @@ import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import keycloak from '../keycloak';
 
+const categories = [
+  'Arte y antigüedades', 'Ropa y accesorios', 'Electrónica', 'Vehículos',
+  'Inmuebles', 'Joyería y accesorios', 'Música e instrumentos', 'Libros y coleccionables',
+  'Hogar y jardín', 'Juguetes y juegos'
+];
+
 const EditarSubasta = () => {
   const { id } = useParams(); // id de la subasta
   const navigate = useNavigate();
@@ -142,9 +148,19 @@ const EditarSubasta = () => {
             <Form.Label>Nombre</Form.Label>
             <Form.Control name="nombre" value={formData.nombre} onChange={handleChange} required />
           </Col>
-          <Col md={6}>
+           <Col md={6}>
             <Form.Label>Tipo de Subasta</Form.Label>
-            <Form.Control name="tipoSubasta" value={formData.tipoSubasta} onChange={handleChange} required />
+            <Form.Select 
+              name="tipoSubasta" 
+              value={formData.tipoSubasta} 
+              onChange={handleChange} 
+              required
+            >
+              <option value="">Selecciona una categoría</option>
+              {categories.map((category, index) => (
+                <option key={index} value={category}>{category}</option>
+              ))}
+            </Form.Select>
           </Col>
         </Row>
 

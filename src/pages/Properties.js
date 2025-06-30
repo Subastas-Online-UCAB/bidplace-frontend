@@ -11,7 +11,15 @@ const categories = [
   'Hogar y jardín', 'Juguetes y juegos'
 ];
 
-const statuses = ['Todas', 'Active', 'Finalizada', 'Pending', 'Canceled'];
+const statuses = [
+  { label: 'Todas', value: 'Todas' },
+  { label: 'Pendiente', value: 'Pending' },
+  { label: 'Activa', value: 'Active' },
+  { label: 'Finalizada', value: 'Ended' },
+  { label: 'Completada', value: 'Completed' },
+  { label: 'Cancelada', value: 'Canceled' }
+];
+
 
 const statusColors = {
   Activa: 'Active',
@@ -164,14 +172,15 @@ const SubastasVistaGeneral = () => {
               <Form.Group>
                 <Form.Label>Estado</Form.Label>
                 <Form.Select 
-                  value={selectedStatus} 
-                  onChange={handleStatusChange}
-                  className="filter-select"
-                >
-                  {statuses.map((status, idx) => (
-                    <option key={idx} value={status}>{status}</option>
-                  ))}
-                </Form.Select>
+  value={selectedStatus} 
+  onChange={handleStatusChange}
+  className="filter-select"
+>
+  {statuses.map((status, idx) => (
+    <option key={idx} value={status.value}>{status.label}</option>
+  ))}
+</Form.Select>
+
               </Form.Group>
             </Col>
             

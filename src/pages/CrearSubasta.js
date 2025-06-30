@@ -4,6 +4,13 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import keycloak from '../keycloak';
 
+
+const categories = [
+  'Arte y antigüedades', 'Ropa y accesorios', 'Electrónica', 'Vehículos',
+  'Inmuebles', 'Joyería y accesorios', 'Música e instrumentos', 'Libros y coleccionables',
+  'Hogar y jardín', 'Juguetes y juegos'
+];
+
 const CrearSubasta = () => {
   const navigate = useNavigate();
 
@@ -112,7 +119,17 @@ const CrearSubasta = () => {
           </Col>
           <Col md={6}>
             <Form.Label>Tipo de Subasta</Form.Label>
-            <Form.Control name="tipoSubasta" value={formData.tipoSubasta} onChange={handleChange} required />
+            <Form.Select 
+              name="tipoSubasta" 
+              value={formData.tipoSubasta} 
+              onChange={handleChange} 
+              required
+            >
+              <option value="">Selecciona una categoría</option>
+              {categories.map((category, index) => (
+                <option key={index} value={category}>{category}</option>
+              ))}
+            </Form.Select>
           </Col>
         </Row>
 
