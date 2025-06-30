@@ -104,7 +104,10 @@ const NavigationBar = () => {
 
                 {/* Métodos de pago solo visible para el rol postor */}
                 {isPostor && (
+                <>
                   <Dropdown.Item as={Link} to="/pagos">Gestionar métodos de pago</Dropdown.Item>
+                   <Dropdown.Item as={Link} to="/mis-reclamos">Mis Reclamos</Dropdown.Item>
+                 </>
                 )}
 
                 {/* Gestionar productos solo visible para el rol subastador */}
@@ -114,7 +117,10 @@ const NavigationBar = () => {
 
                 {/* Gestionar roles y permisos solo visible para el rol administrador */}
                 {isAdmin && (
+                  <>
                   <Dropdown.Item as={Link} to="/admin">Gestionar roles y permisos</Dropdown.Item>
+                  <Dropdown.Item as={Link} to="/admin/reclamos">Mis Reclamos</Dropdown.Item>
+                  </>
                 )}
                 {isSubastador && (
                   <Dropdown.Item as={Link} to="/mis-subastas">Gestionar mis subastas</Dropdown.Item>

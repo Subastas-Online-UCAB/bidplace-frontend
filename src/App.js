@@ -20,6 +20,8 @@ import Inicio from './pages/inicio';
 import Cuenta from './pages/Cuenta';
 import MisSubastas from './pages/MisSubastas'
 import EditarSubasta from './pages/EditarSubasta'
+import MisReclamos from './pages/MisReclamos'
+import GestionReclamos from './pages/GestionReclamos'
 import ProtectedRoute from './components/ProtectedRoute';
 
 
@@ -59,6 +61,10 @@ function App() {
               <Route path="/cuenta" element={<Cuenta />} />
               <Route path="/editar-subasta/:id" element={<EditarSubasta />} />
               <Route path="/mis-subastas" element={<MisSubastas />} />
+              <Route path="/mis-reclamos" element={<MisReclamos />} />
+              <Route path="/admin/reclamos" element={<GestionReclamos />} />
+
+
 
             </Routes>
           </main>
