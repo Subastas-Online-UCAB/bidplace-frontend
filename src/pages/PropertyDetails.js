@@ -29,6 +29,7 @@ const PropertyDetails = () => {
   const [alertaPuja, setAlertaPuja] = useState(null);
   const [showReclamoModal, setShowReclamoModal] = useState(false);
 const [reclamoTexto, setReclamoTexto] = useState('');
+const [motivoReclamo, setMotivoReclamo] = useState('');
   const bidAudio = new Audio(bidSound);
 bidAudio.volume = 0.5; // volumen moderado
 
@@ -373,6 +374,14 @@ bidAudio.volume = 0.5; // volumen moderado
     <div className="modal-content">
       <button className="modal-close" onClick={() => setShowReclamoModal(false)}>&times;</button>
       <h2>Registrar reclamo</h2>
+      <input
+        type="text"
+        placeholder="Motivo del reclamo"
+        value={motivoReclamo}
+        onChange={(e) => setMotivoReclamo(e.target.value)}
+        style={{ width: '100%', padding: '10px', marginBottom: '10px' }}
+      />
+
       <textarea
         value={reclamoTexto}
         onChange={(e) => setReclamoTexto(e.target.value)}
@@ -385,12 +394,13 @@ bidAudio.volume = 0.5; // volumen moderado
         onClick={async () => {
           try {
             const data = {
-              subastaId: id,
-              usuarioEmail: keycloak.tokenParsed?.email,
+              usuarioId: keycloak.tokenParsed?.email,
+              subastaId: id,            
+              motivo: motivoReclamo,
               descripcion: reclamoTexto
             };
 
-            await axios.post('http://localhost:5118/reclamos/api/Reclamos/registrar', data, {
+            await axios.post('http://localhost:5118/reclamos/api/reclamos', data, {
               headers: { Authorization: `Bearer ${keycloak.token}` }
             });
 
