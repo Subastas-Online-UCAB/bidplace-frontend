@@ -123,7 +123,7 @@ const SubastasVistaGeneral = () => {
       {/* Header con título y botón */}
       <Row className="mb-4 align-items-center">
         <Col md={8}>
-          <h2 className="page-title">Subastas Disponibles</h2>
+          <h2 className="page-title"> Subastas Disponibles</h2>
           <p className="text-muted">Explora las mejores oportunidades en subastas exclusivas</p>
         </Col>
         <Col md={4} className="text-end">
