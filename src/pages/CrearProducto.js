@@ -1,68 +1,96 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import axios from 'axios';
+import keycloak from '../keycloak';
 
 function CrearProducto() {
-  // Estado para previsualizar la imagen seleccionada
   const [imagePreview, setImagePreview] = useState(null);
-
-  // Estado para almacenar los datos del formulario
+  const [idUsuario, setIdUsuario] = useState('');
   const [formData, setFormData] = useState({
     nombre: '',
-    categoria: '',
-    descripcion: ''
+    tipo: '',
+    descripcion: '',
+    cantidad: ''
   });
 
-  // Referencia para el input de archivo (imagen)
   const fileInputRef = useRef(null);
 
-  // Maneja el cambio de imagen (cuando el usuario selecciona un archivo)
+  useEffect(() => {
+    const obtenerIdUsuario = async () => {
+      try {
+        const email = keycloak.tokenParsed?.email;
+        if (!email) {
+          console.error('Email no encontrado en el token');
+          return;
+        }
+
+        const response = await axios.get(`http://localhost:5118/usuarios/api/User/by-email?email=${email}`, {
+          headers: {
+            Authorization: `Bearer ${keycloak.token}`
+          }
+        });
+
+        setIdUsuario(response.data.id);
+      } catch (error) {
+        console.error('Error obteniendo el id del usuario:', error);
+      }
+    };
+
+    obtenerIdUsuario();
+  }, []);
+
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setImagePreview(URL.createObjectURL(file)); // Crea una URL temporal para mostrar la imagen
+      setImagePreview(URL.createObjectURL(file));
     }
   };
 
-  // Maneja la eliminación de la imagen seleccionada
   const handleRemoveImage = () => {
     setImagePreview(null);
-    fileInputRef.current.value = ''; // Limpia el input de tipo file
+    fileInputRef.current.value = '';
   };
 
-  // Abre el selector de archivos al hacer clic en la caja
   const handleBoxClick = () => {
     fileInputRef.current.click();
   };
 
-  // Maneja el cambio en los inputs del formulario
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
-      [name]: value // Actualiza el valor del campo correspondiente
+      [name]: value
     });
   };
 
-  // Maneja el envío del formulario
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // 🔴 Aquí deberías realizar la conexión al backend para enviar los datos del producto
-    // Ejemplo: 
-    // const dataToSend = new FormData();
-    // dataToSend.append('nombre', formData.nombre);
-    // dataToSend.append('categoria', formData.categoria);
-    // dataToSend.append('descripcion', formData.descripcion);
-    // dataToSend.append('imagen', fileInputRef.current.files[0]);
-    //
-    // await axios.post('/api/productos', dataToSend);
 
-    console.log('Formulario enviado:', formData); // Actualmente solo imprime en consola
+    const producto = {
+      nombre: formData.nombre,
+      descripcion: formData.descripcion,
+      tipo: formData.tipo,
+      cantidad: parseInt(formData.cantidad),
+      idUsuario: idUsuario
+    };
+
+    try {
+      const response = await axios.post('http://localhost:5118/productos/api/Productos', producto, {
+        headers: {
+          Authorization: `Bearer ${keycloak.token}`
+        }
+      });
+
+      alert('Producto creado correctamente');
+    } catch (error) {
+      console.error('Error al crear el producto:', error);
+      alert('Error al crear el producto');
+    }
   };
 
   return (
     <div className="container my-5">
       <h2 className="mb-4 text-center">Crear Producto</h2>
       <div className="row">
-        {/* Zona izquierda - Imagen */}
         <div className="col-md-6 d-flex flex-column align-items-center">
           <div
             className="border rounded p-4 w-100 d-flex flex-column align-items-center justify-content-center"
@@ -81,10 +109,7 @@ function CrearProducto() {
           </div>
 
           {imagePreview && (
-            <button
-              className="btn btn-danger mt-3"
-              onClick={handleRemoveImage}
-            >
+            <button className="btn btn-danger mt-3" onClick={handleRemoveImage}>
               Eliminar Imagen
             </button>
           )}
@@ -94,11 +119,10 @@ function CrearProducto() {
             accept="image/*"
             onChange={handleImageChange}
             ref={fileInputRef}
-            style={{ display: 'none' }} // Ocultamos el input de tipo file
+            style={{ display: 'none' }}
           />
         </div>
 
-        {/* Zona derecha - Formulario */}
         <div className="col-md-6">
           <form onSubmit={handleSubmit}>
             <div className="mb-3">
@@ -108,22 +132,21 @@ function CrearProducto() {
                 className="form-control"
                 id="nombre"
                 name="nombre"
-                placeholder="Ej: Reloj Smartwatch"
                 value={formData.nombre}
                 onChange={handleInputChange}
               />
             </div>
 
             <div className="mb-3">
-              <label htmlFor="categoria" className="form-label">Categoría</label>
+              <label htmlFor="tipo" className="form-label">Tipo (Categoría)</label>
               <select
                 className="form-select"
-                id="categoria"
-                name="categoria"
-                value={formData.categoria}
+                id="tipo"
+                name="tipo"
+                value={formData.tipo}
                 onChange={handleInputChange}
               >
-                <option>Selecciona una categoría</option>
+                <option value="">Selecciona una categoría</option>
                 <option>Arte y antigüedades</option>
                 <option>Ropa y accesorios</option>
                 <option>Electrónica</option>
@@ -144,10 +167,22 @@ function CrearProducto() {
                 id="descripcion"
                 name="descripcion"
                 rows="5"
-                placeholder="Descripción detallada del producto..."
                 value={formData.descripcion}
                 onChange={handleInputChange}
               ></textarea>
+            </div>
+
+            <div className="mb-3">
+              <label htmlFor="cantidad" className="form-label">Cantidad</label>
+              <input
+                type="number"
+                className="form-control"
+                id="cantidad"
+                name="cantidad"
+                min="1"
+                value={formData.cantidad}
+                onChange={handleInputChange}
+              />
             </div>
 
             <button type="submit" className="btn btn-primary w-100">Guardar</button>

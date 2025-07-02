@@ -8,10 +8,12 @@ export const initKeycloak = () => {
     return keycloak.init({
       onLoad: 'check-sso',
       silentCheckSsoRedirectUri: window.location.origin + '/silent-check-sso.html',
+      redirectUri: window.location.origin + '/#/home' // 👈 este es el cambio clave
     });
   } else {
     return Promise.resolve(keycloak.authenticated);
   }
 };
+
 
 export default keycloak;

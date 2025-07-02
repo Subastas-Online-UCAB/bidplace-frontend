@@ -44,8 +44,21 @@ const Home = () => {
   const [currentImage, setCurrentImage] = useState(0);
   const [fade, setFade] = useState(true);
 
+  
+
   // Se debe integrar el backend aquí para obtener imágenes dinámicas en lugar de las locales
   useEffect(() => {
+      const url = window.location.href;
+
+  const hasRefreshed = sessionStorage.getItem('hasRefreshed');
+  const isRoot = url.endsWith('/') || url.endsWith('/#') || url.endsWith('/#/');
+
+  if (isRoot && !hasRefreshed) {
+    sessionStorage.setItem('hasRefreshed', 'true');
+    window.location.href = window.location.origin + '/#/home';
+    return;
+  }
+
     const interval = setInterval(() => {
       setFade(false);
       setTimeout(() => {
