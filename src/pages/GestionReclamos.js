@@ -14,6 +14,7 @@ const GestionReclamos = () => {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [estadoFilter, setEstadoFilter] = useState('');
+  const [soluciones, setSoluciones] = useState({}); // 🆕 solución por reclamo
 
   const fetchReclamos = async () => {
     try {
@@ -32,22 +33,39 @@ const GestionReclamos = () => {
     }
   };
 
-  const marcarComoResuelto = async (reclamoId) => {
+  const handleSolucionChange = (reclamoId, value) => {
+    setSoluciones(prev => ({
+      ...prev,
+      [reclamoId]: value
+    }));
+  };
+
+  const enviarSolucion = async (reclamoId) => {
+    const solucion = soluciones[reclamoId];
+    if (!solucion || solucion.trim() === '') {
+      alert("Debes ingresar una solución antes de enviarla.");
+      return;
+    }
+
     try {
-      await axios.put(`http://localhost:5118/reclamos/api/reclamos/resolver/${reclamoId}`, {}, {
+      await axios.put(`http://localhost:5118/reclamos/api/reclamos/resolver`, {
+        reclamoId: reclamoId,
+        solucion: solucion
+      }, {
         headers: {
           Authorization: `Bearer ${keycloak.token}`
         }
       });
 
       const actualizados = reclamos.map(r =>
-        r.id === reclamoId ? { ...r, estado: "Resuelto" } : r
+        r.id === reclamoId ? { ...r, estado: "Resuelto", solucion } : r
       );
       setReclamos(actualizados);
       aplicarFiltros(actualizados);
+      setSoluciones(prev => ({ ...prev, [reclamoId]: '' }));
     } catch (err) {
-      console.error("Error al marcar como resuelto:", err);
-      alert("No se pudo marcar el reclamo como resuelto.");
+      console.error("Error al enviar solución:", err);
+      alert("No se pudo enviar la solución.");
     }
   };
 
@@ -126,20 +144,36 @@ const GestionReclamos = () => {
               </Card.Text>
               <Card.Text><strong>Fecha:</strong> {new Date(reclamo.fechaCreacion).toLocaleString()}</Card.Text>
 
-              <div className="d-flex gap-2">
+              <div className="d-flex flex-column gap-2">
                 <Button
                   variant="info"
                   onClick={() => alert(`Descripción:\n${reclamo.descripcion}`)}
                 >
                   Ver Detalles
                 </Button>
+
                 {reclamo.estado !== "Resuelto" && (
-                  <Button
-                    variant="success"
-                    onClick={() => marcarComoResuelto(reclamo.id)}
-                  >
-                    Marcar como Resuelto
-                  </Button>
+                  <>
+                    <Form.Control
+                      type="text"
+                      placeholder="Escribe la solución..."
+                      value={soluciones[reclamo.id] || ''}
+                      onChange={(e) => handleSolucionChange(reclamo.id, e.target.value)}
+                    />
+                    <Button
+                      variant="success"
+                      onClick={() => enviarSolucion(reclamo.id)}
+                    >
+                      Enviar Solución
+                    </Button>
+                  </>
+                )}
+
+                {reclamo.solucion && (
+                  <Alert variant="light" className="mt-2">
+                    <strong>Solución registrada:</strong><br />
+                    {reclamo.solucion}
+                  </Alert>
                 )}
               </div>
             </Card.Body>
