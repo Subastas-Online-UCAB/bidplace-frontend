@@ -1,40 +1,70 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Button, Table } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
-
-// Lista de productos de ejemplo (esto eventualmente se reemplazaría por datos provenientes del backend)
-const initialProducts = [
-  { id: 1, name: 'Producto A', date: '2025-04-20' },
-  { id: 2, name: 'Producto B', date: '2025-04-22' },
-  { id: 3, name: 'Producto C', date: '2025-04-25' },
-];
+import axios from 'axios';
+import keycloak from '../keycloak';
 
 const Producto = () => {
-  const [products, setProducts] = useState(initialProducts); // Estado que guarda los productos
-  const navigate = useNavigate(); // Hook para navegar entre rutas
+  const [products, setProducts] = useState([]);
+  const navigate = useNavigate();
 
-  // Función para eliminar el producto
-  const handleDelete = (id) => {
-    // 🔴 Aquí deberías hacer una petición al backend para eliminar el producto
-    // Ejemplo: await axios.delete(`/api/productos/${id}`);
-    
-    // Luego actualizas el estado local para reflejar el cambio
-    setProducts((prevProducts) => prevProducts.filter(product => product.id !== id));
+  useEffect(() => {
+    const fetchProductos = async () => {
+      try {
+        const email = keycloak.tokenParsed?.email;
+        if (!email) {
+          console.error('Email no encontrado en el token');
+          return;
+        }
+
+        const userResponse = await axios.get(`http://localhost:5118/usuarios/api/User/by-email?email=${email}`, {
+          headers: {
+            Authorization: `Bearer ${keycloak.token}`
+          }
+        });
+
+        const userId = userResponse.data.id;
+
+        const productosResponse = await axios.get('http://localhost:5118/productos/api/Productos', {
+          headers: {
+            Authorization: `Bearer ${keycloak.token}`
+          }
+        });
+
+        const productosFiltrados = productosResponse.data.filter(p => p.idUsuario === userId);
+        setProducts(productosFiltrados);
+      } catch (error) {
+        console.error('Error al obtener productos:', error);
+      }
+    };
+
+    fetchProductos();
+  }, []);
+
+  const handleDelete = async (id) => {
+    try {
+      await axios.delete(`http://localhost:5118/productos/api/Productos/${id}`, {
+        headers: {
+          Authorization: `Bearer ${keycloak.token}`
+        }
+      });
+
+      setProducts(prevProducts => prevProducts.filter(product => product.id !== id));
+    } catch (error) {
+      console.error('Error al eliminar el producto:', error);
+    }
   };
 
   return (
-    <Container className="my-5">
-      {/* Encabezado con botón para crear un nuevo producto */}
+    <Container className="pt-5 mt-5 mb-5">
       <Row className="mb-4 d-flex justify-content-between align-items-center">
         <Col xs="auto">
-          {/* Al presionar el botón, redirige a la página de creación de producto */}
           <Button variant="success" onClick={() => navigate('/crear-producto')}>
             Crear Producto
           </Button>
         </Col>
       </Row>
 
-      {/* Tabla que lista los productos */}
       <Table striped bordered hover>
         <thead>
           <tr>
@@ -44,27 +74,31 @@ const Producto = () => {
           </tr>
         </thead>
         <tbody>
-          {/* Recorremos los productos y mostramos cada uno en una fila */}
           {products.map((product) => (
             <tr key={product.id}>
-              <td>{product.name}</td>
-              <td>{new Date(product.date).toLocaleDateString()}</td> {/* Formateamos la fecha */}
+              <td>{product.nombre}</td>
+              <td>{new Date(product.fechaCreacion || product.fecha || Date.now()).toLocaleDateString()}</td>
               <td>
-                {/* Botón para ver detalles del producto */}
-                <Button as={Link} to={`/productos/${product.id}`} variant="info" className="btn-sm me-2">
+                <Button
+                  as={Link}
+                  to={`/productos/${product.id}`}
+                  variant="info"
+                  className="btn-sm me-2"
+                >
                   Ver
                 </Button>
-
-                {/* Botón para editar producto */}
-                <Button variant="warning" className="btn-sm me-2">
+                <Button
+                  as={Link}
+                  to={`/productos/editar/${product.idProducto}`}
+                  variant="warning"
+                  className="btn-sm me-2"
+                >
                   Editar
                 </Button>
-
-                {/* Botón para eliminar producto */}
-                <Button 
-                  variant="danger" 
+                <Button
+                  variant="danger"
                   className="btn-sm"
-                  onClick={() => handleDelete(product.id)} // Ejecuta la función de eliminar
+                  onClick={() => handleDelete(product.id)}
                 >
                   Eliminar
                 </Button>

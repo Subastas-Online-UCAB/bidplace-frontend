@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Form, Button, Modal, Alert } from 'react-bootstrap';
+import { Container, Row, Col, Form, Button, Modal, Alert, Table } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import keycloak from '../keycloak';
-
 
 const categories = [
   'Arte y antigüedades', 'Ropa y accesorios', 'Electrónica', 'Vehículos',
@@ -24,22 +23,16 @@ const CrearSubasta = () => {
     incrementoMinimo: '',
     precioReserva: '',
     tipoSubasta: '',
-    idUsuario: '', // se asigna dinámicamente
+    idUsuario: '',
     estado: 'Pendiente',
     idProducto: ''
   });
 
-  const [productosDisponibles] = useState([
-    { id: '3fa85f64-5717-4562-b3fc-2c963f66afa6', nombre: 'Laptop Dell Inspiron' },
-    { id: '3fa85f64-5717-4562-b3fc-2c963f66afa3', nombre: 'iPhone 13 Pro Max' },
-    { id: '3fa85f64-5717-4562-b3fc-2c963f66afa2', nombre: 'Guitarra Fender Stratocaster' }
-  ]);
-
+  const [productosDisponibles, setProductosDisponibles] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
 
-  // Obtener el ID del usuario desde el backend por email
   useEffect(() => {
     const fetchUserId = async () => {
       try {
@@ -52,10 +45,20 @@ const CrearSubasta = () => {
           }
         });
 
-        setFormData(prev => ({ ...prev, idUsuario: response.data.id }));
+        const userId = response.data.id;
+        setFormData(prev => ({ ...prev, idUsuario: userId }));
+
+        const responseProductos = await axios.get('http://localhost:5118/productos/api/Productos', {
+          headers: {
+            Authorization: `Bearer ${keycloak.token}`
+          }
+        });
+
+        const productosFiltrados = responseProductos.data.filter(p => p.idUsuario === userId);
+        setProductosDisponibles(productosFiltrados);
       } catch (err) {
-        console.error("Error al obtener el ID del usuario:", err);
-        setError('No se pudo obtener el usuario autenticado.');
+        console.error("Error al obtener el ID del usuario o los productos:", err);
+        setError('No se pudo cargar el usuario o sus productos.');
       }
     };
 
@@ -68,7 +71,9 @@ const CrearSubasta = () => {
   };
 
   const seleccionarProducto = (producto) => {
-    setFormData((prev) => ({ ...prev, idProducto: producto.id }));
+    const id = producto.id || producto.idProducto;
+    console.log('Producto seleccionado:', id, producto);
+    setFormData((prev) => ({ ...prev, idProducto: id }));
     setShowModal(false);
   };
 
@@ -78,27 +83,32 @@ const CrearSubasta = () => {
     const duracionDias = parseInt(formData.duracion, 10);
     const duracionTimeSpan = `${duracionDias}.00:00:00`;
 
+    if (!formData.idProducto) {
+      setError('Debes seleccionar un producto antes de crear la subasta.');
+      return;
+    }
+
     try {
-      await axios.post(
-        'http://localhost:5118/subastas/api/Subastas',
-        {
-          ...formData,
-          precioBase: parseFloat(formData.precioBase),
-          incrementoMinimo: parseFloat(formData.incrementoMinimo),
-          precioReserva: parseFloat(formData.precioReserva),
-          fechaInicio: new Date(formData.fechaInicio).toISOString(),
-          duracion: duracionTimeSpan
-        },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${keycloak.token}`
-          }
+      const body = {
+        ...formData,
+        precioBase: parseFloat(formData.precioBase),
+        incrementoMinimo: parseFloat(formData.incrementoMinimo),
+        precioReserva: parseFloat(formData.precioReserva),
+        fechaInicio: new Date(formData.fechaInicio).toISOString(),
+        duracion: duracionTimeSpan
+      };
+
+      console.log("Body enviado:", body);
+
+      await axios.post('http://localhost:5118/subastas/api/Subastas', body, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${keycloak.token}`
         }
-      );
+      });
 
       setSuccess(true);
-      setTimeout(() => navigate('/'), 1500);
+       setTimeout(() => navigate('/'), 1500);
     } catch (err) {
       console.error(err);
       setError('Ocurrió un error al crear la subasta.');
@@ -119,12 +129,7 @@ const CrearSubasta = () => {
           </Col>
           <Col md={6}>
             <Form.Label>Tipo de Subasta</Form.Label>
-            <Form.Select 
-              name="tipoSubasta" 
-              value={formData.tipoSubasta} 
-              onChange={handleChange} 
-              required
-            >
+            <Form.Select name="tipoSubasta" value={formData.tipoSubasta} onChange={handleChange} required>
               <option value="">Selecciona una categoría</option>
               {categories.map((category, index) => (
                 <option key={index} value={category}>{category}</option>
@@ -174,26 +179,48 @@ const CrearSubasta = () => {
         <Form.Group className="mb-3">
           <Form.Label>Producto Seleccionado</Form.Label><br />
           <Button variant="outline-primary" onClick={() => setShowModal(true)}>
-            {formData.idProducto ? 'Cambiar Producto' : 'Seleccionar Producto'}
+            {formData.idProducto
+              ? `Producto: ${productosDisponibles.find(p => (p.id || p.idProducto) === formData.idProducto)?.nombre || 'Seleccionado'}`
+              : 'Seleccionar Producto'}
           </Button>
         </Form.Group>
 
         <Button type="submit" variant="success" disabled={!formData.idUsuario}>Crear Subasta</Button>
       </Form>
 
-      <Modal show={showModal} onHide={() => setShowModal(false)}>
+      <Modal show={showModal} onHide={() => setShowModal(false)} size="lg" centered>
         <Modal.Header closeButton>
-          <Modal.Title>Seleccionar Producto</Modal.Title>
+          <Modal.Title>Selecciona un Producto para Subastar</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <ul className="list-group">
-            {productosDisponibles.map((producto) => (
-              <li key={producto.id} className="list-group-item d-flex justify-content-between align-items-center">
-                {producto.nombre}
-                <Button variant="primary" size="sm" onClick={() => seleccionarProducto(producto)}>Seleccionar</Button>
-              </li>
-            ))}
-          </ul>
+          {productosDisponibles.length === 0 ? (
+            <p className="text-muted">No tienes productos disponibles. Crea uno antes de subastar.</p>
+          ) : (
+            <Table striped bordered hover responsive>
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Tipo</th>
+                  <th>Cantidad</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody>
+                {productosDisponibles.map((producto) => (
+                  <tr key={producto.id || producto.idProducto}>
+                    <td>{producto.nombre}</td>
+                    <td>{producto.tipo || '—'}</td>
+                    <td>{producto.cantidad || 1}</td>
+                    <td>
+                      <Button variant="primary" size="sm" onClick={() => seleccionarProducto(producto)}>
+                        Seleccionar
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          )}
         </Modal.Body>
       </Modal>
     </Container>

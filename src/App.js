@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import { HashRouter  as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 
 import NavigationBar from './components/Navbar';
 import Footer from './components/Footer';
@@ -22,6 +22,8 @@ import MisSubastas from './pages/MisSubastas'
 import EditarSubasta from './pages/EditarSubasta'
 import MisReclamos from './pages/MisReclamos'
 import GestionReclamos from './pages/GestionReclamos'
+import EditarProducto from './pages/EditarProducto';
+
 import ProtectedRoute from './components/ProtectedRoute';
 
 
@@ -63,6 +65,8 @@ function App() {
               <Route path="/mis-subastas" element={<MisSubastas />} />
               <Route path="/mis-reclamos" element={<MisReclamos />} />
               <Route path="/admin/reclamos" element={<GestionReclamos />} />
+              <Route path="/productos/editar/:id" element={<EditarProducto />} />
+
 
 
 

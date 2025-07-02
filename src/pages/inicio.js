@@ -6,7 +6,7 @@ import heroImage from '../pages/img/bid.svg'; // Usa una ilustración SVG modern
 
 const Inicio = () => {
   const handleLogin = () => {
-    keycloak.login({ redirectUri: window.location.origin + '/home' });
+    keycloak.login({ redirectUri: window.location.origin + '/#/home' });
   };
 
   const handlePasswordReset = () => {
