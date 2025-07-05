@@ -23,6 +23,8 @@ import EditarSubasta from './pages/EditarSubasta'
 import MisReclamos from './pages/MisReclamos'
 import GestionReclamos from './pages/GestionReclamos'
 import EditarProducto from './pages/EditarProducto';
+import HistorialActividad from './pages/HistorialActividad';
+import HistorialPujas from './pages/HistorialPujas'
 
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -66,6 +68,9 @@ function App() {
               <Route path="/mis-reclamos" element={<MisReclamos />} />
               <Route path="/admin/reclamos" element={<GestionReclamos />} />
               <Route path="/productos/editar/:id" element={<EditarProducto />} />
+              <Route path="/historial" element={<HistorialActividad />} />
+              <Route path="/historial-pujas" element={<HistorialPujas />} />
+
 
 
 

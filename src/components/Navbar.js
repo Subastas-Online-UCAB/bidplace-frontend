@@ -8,54 +8,82 @@ import {
 } from 'react-bootstrap';
 
 import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 import './Navbar.css';
 
-// Importa el logo del sitio y la imagen por defecto del usuario
 import lawLogo from '../pages/img/law.png';
 import defaultUserImage from '../pages/img/usuario.png';
-import keycloak from "../keycloak"; // Ajusta la ruta si está en otro lugar
+import keycloak from "../keycloak";
 
 const NavigationBar = () => {
-  // Estado para almacenar la información del usuario logueado
   const [user, setUser] = useState({
     name: "Usuario Demo",
     profileImage: defaultUserImage,
   });
 
-  // Verificamos si el usuario tiene ciertos roles desde el token de Keycloak
   const isPostor = keycloak?.tokenParsed?.realm_access?.roles?.includes("Postor");
   const isSubastador = keycloak?.tokenParsed?.realm_access?.roles?.includes("subastador");
   const isAdmin = keycloak?.tokenParsed?.realm_access?.roles?.includes("Administrador");
 
-  // Usamos useEffect para actualizar el nombre del usuario al cargar el componente
   useEffect(() => {
     if (keycloak && keycloak.tokenParsed) {
-      // Obtener el nombre del usuario desde el token
       const username = keycloak.tokenParsed.preferred_username || "Usuario Demo";
-      const profileImg = keycloak.tokenParsed.picture || defaultUserImage; // Puedes ajustar esto si tienes una imagen configurada
+      const profileImg = keycloak.tokenParsed.picture || defaultUserImage;
 
-      // Actualizar el estado del usuario
       setUser({
         name: username,
         profileImage: profileImg,
       });
     }
-  }, []); // Solo se ejecuta una vez al cargar el componente
+  }, []);
 
   const navigate = useNavigate();
 
-  // Función para manejar el click de navegación
-  const handleNavClick = (e, to) => {
-    if (to === "/home") return;
-    navigate(to);
+  const secciones = {
+    "/home": "Inicio",
+    "/properties": "Consultar Subastas",
+    "/historial": "Historial de actividad",
+    "/soporte": "Soporte",
+    "/cuenta": "Configuración de la cuenta",
+    "/pagos": "Gestionar métodos de pago",
+    "/mis-reclamos": "Mis Reclamos",
+    "/producto": "Gestionar productos",
+    "/mis-subastas": "Mis Subastas",
+    "/admin": "Gestión de roles y permisos",
+    "/admin/reclamos": "Reclamos (Administrador)"
+  };
+
+  const handleNavClick = async (e, to) => {
+    e.preventDefault();
+
+    const email = keycloak.tokenParsed?.email;
+    const nombreSeccion = secciones[to] || to;
+
+    try {
+      if (email) {
+        await axios.post('http://localhost:5118/usuarios/api/User/registrar-movimiento', {
+          email: email,
+          accion: nombreSeccion,
+          detalles: `El usuario accedió a la sección: ${nombreSeccion}`
+        }, {
+          headers: {
+            Authorization: `Bearer ${keycloak.token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Error registrando movimiento:', error);
+    } finally {
+      navigate(to);
+    }
   };
 
   return (
     <Navbar expand="lg" className="bg-white shadow-sm py-3 fixed-top">
       <Container>
-        {/* Logo y nombre del sitio */}
-        <Navbar.Brand as={Link} to="/" className="d-flex align-items-center">
+        <Navbar.Brand as={Link} to="/" onClick={(e) => handleNavClick(e, "/home")} className="d-flex align-items-center">
           <img src={lawLogo} alt="Logo" width={28} height={28} className="me-2" />
           <span className="fs-5 fw-bold text-dark">
             BidPlace<span className="text-danger">.</span>
@@ -64,12 +92,11 @@ const NavigationBar = () => {
 
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
-          {/* Menú de navegación principal */}
           <Nav className="me-auto ms-4">
-            <Nav.Link as={Link} to="/home" className="text-dark fw-medium mx-2 border-bottom border-danger pb-1">
+            <Nav.Link as={Link} to="/home" onClick={(e) => handleNavClick(e, "/home")} className="text-dark fw-medium mx-2 border-bottom border-danger pb-1">
               Inicio
             </Nav.Link>
-            <Nav.Link as={Link} to="/properties" onClick={(e) => handleNavClick(e, "/subastas")} className="text-dark fw-medium mx-2">
+            <Nav.Link as={Link} to="/subastas" onClick={(e) => handleNavClick(e, "/properties")} className="text-dark fw-medium mx-2">
               Consultar Subastas
             </Nav.Link>
             <Nav.Link as={Link} to="/historial" onClick={(e) => handleNavClick(e, "/historial")} className="text-dark fw-medium mx-2">
@@ -78,9 +105,10 @@ const NavigationBar = () => {
             <Nav.Link as={Link} to="/soporte" onClick={(e) => handleNavClick(e, "/soporte")} className="text-dark fw-medium mx-2">
               Soporte
             </Nav.Link>
+            <Nav.Link as={Link} to="/historial-pujas">Historial de Pujas</Nav.Link>
+
           </Nav>
 
-          {/* Menú del usuario logueado */}
           <Nav className="align-items-center">
             <Dropdown align="end">
               <Dropdown.Toggle variant="link" className="p-0 border-0">
@@ -94,51 +122,43 @@ const NavigationBar = () => {
               </Dropdown.Toggle>
               <Dropdown.Menu>
                 <Dropdown.Header className="fw-semibold text-dark">
-                  {user?.name} {/* Aquí se muestra el nombre del usuario logueado */}
+                  {user?.name}
                 </Dropdown.Header>
-                
-                {/* Configuración de la cuenta visible para postor, subastador y administrador */}
+
                 {(isPostor || isSubastador || isAdmin) && (
-                  <Dropdown.Item as={Link} to="/cuenta">Configuración de la cuenta</Dropdown.Item>
+                  <Dropdown.Item onClick={(e) => handleNavClick(e, "/cuenta")}>Configuración de la cuenta</Dropdown.Item>
                 )}
 
-                {/* Métodos de pago solo visible para el rol postor */}
                 {isPostor && (
-                <>
-                  <Dropdown.Item as={Link} to="/pagos">Gestionar métodos de pago</Dropdown.Item>
-                   <Dropdown.Item as={Link} to="/mis-reclamos">Mis Reclamos</Dropdown.Item>
-                 </>
-                )}
-
-                {/* Gestionar productos solo visible para el rol subastador */}
-                {isSubastador && (
-                  <Dropdown.Item as={Link} to="/producto">Gestionar productos</Dropdown.Item>
-                )}
-
-                {/* Gestionar roles y permisos solo visible para el rol administrador */}
-                {isAdmin && (
                   <>
-                  <Dropdown.Item as={Link} to="/admin">Gestionar roles y permisos</Dropdown.Item>
-                  <Dropdown.Item as={Link} to="/admin/reclamos">Mis Reclamos</Dropdown.Item>
+                    <Dropdown.Item onClick={(e) => handleNavClick(e, "/pagos")}>Gestionar métodos de pago</Dropdown.Item>
+                    <Dropdown.Item onClick={(e) => handleNavClick(e, "/mis-reclamos")}>Mis Reclamos</Dropdown.Item>
                   </>
                 )}
+
                 {isSubastador && (
-                  <Dropdown.Item as={Link} to="/mis-subastas">Gestionar mis subastas</Dropdown.Item>
+                  <>
+                    <Dropdown.Item onClick={(e) => handleNavClick(e, "/producto")}>Gestionar productos</Dropdown.Item>
+                    <Dropdown.Item onClick={(e) => handleNavClick(e, "/mis-subastas")}>Mis Subastas</Dropdown.Item>
+                  </>
+                )}
+
+                {isAdmin && (
+                  <>
+                    <Dropdown.Item onClick={(e) => handleNavClick(e, "/admin")}>Gestionar roles y permisos</Dropdown.Item>
+                    <Dropdown.Item onClick={(e) => handleNavClick(e, "/admin/reclamos")}>Mis Reclamos</Dropdown.Item>
+                  </>
                 )}
 
                 <Dropdown.Divider />
-                
-                {/* Cerrar sesión */}
-                <Dropdown.Item onClick={() => {
-                      // Elimina datos del localStorage
-                      localStorage.removeItem("token");
-                      localStorage.removeItem("roles");
 
-                      // Redirige con Keycloak logout y una URI de retorno
-                      keycloak.logout({
-                        redirectUri: window.location.origin
-                      });
-                  }}>
+                <Dropdown.Item onClick={() => {
+                  localStorage.removeItem("token");
+                  localStorage.removeItem("roles");
+                  keycloak.logout({
+                    redirectUri: window.location.origin
+                  });
+                }}>
                   Cerrar sesión
                 </Dropdown.Item>
               </Dropdown.Menu>
