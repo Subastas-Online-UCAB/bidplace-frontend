@@ -20,18 +20,11 @@ const statuses = [
   { label: 'Cancelada', value: 'Canceled' }
 ];
 
-
 const statusColors = {
   Activa: 'Active',
   Finalizada: 'Completed',
   Pendiente: 'Pending',
   Canceladas: 'Canceled'
-};
-
-const statusTranslation = {
-  Activa: 'Active',
-  Finalizada: 'Completed',
-  Pendiente: 'Pending'
 };
 
 const SubastasVistaGeneral = () => {
@@ -40,63 +33,42 @@ const SubastasVistaGeneral = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('Todas');
   const [subastas, setSubastas] = useState([]);
+  const [productos, setProductos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [esSubastador, setEsSubastador] = useState(false);
 
   useEffect(() => {
-    // Verificar si el usuario tiene el rol "Subastador"
-    const roles = keycloak.tokenParsed?.realm_access?.roles || [];
-    setEsSubastador(roles.includes('subastador'));
-
-    const fetchSubastas = async () => {
+    const fetchData = async () => {
       try {
-        const response = await axios.get(
-          'http://localhost:5118/subastas/api/Subastas',
-          {
-            headers: {
-              Authorization: `Bearer ${keycloak.token}`
-            }
-          }
-        );
-        setSubastas(response.data);
+        const roles = keycloak.tokenParsed?.realm_access?.roles || [];
+        setEsSubastador(roles.includes('subastador'));
+
+        const [subastasResponse, productosResponse] = await Promise.all([
+          axios.get('http://localhost:5118/subastas/api/Subastas', {
+            headers: { Authorization: `Bearer ${keycloak.token}` }
+          }),
+          axios.get('http://localhost:5118/productos/api/ProductosControlador', {
+            headers: { Authorization: `Bearer ${keycloak.token}` }
+          })
+        ]);
+
+        setSubastas(subastasResponse.data);
+        setProductos(productosResponse.data);
         setLoading(false);
       } catch (err) {
-        setError('Error al cargar las subastas. Por favor, inténtalo de nuevo más tarde.');
+        console.error(err);
+        setError('Error al cargar las subastas o productos.');
         setLoading(false);
       }
     };
 
-    fetchSubastas();
+    fetchData();
   }, []);
 
   const handleCategoryChange = (e) => setSelectedCategory(e.target.value);
   const handleSearchChange = (e) => setSearchTerm(e.target.value);
   const handleStatusChange = (e) => setSelectedStatus(e.target.value);
-
-  // Mapear los datos de la API al formato esperado por el componente
-  const mappedSubastas = subastas.map(subasta => ({
-    id: subasta.idSubasta,
-    title: subasta.nombre,
-    description: subasta.descripcion,
-    category: subasta.tipoSubasta,
-    status: subasta.estado,
-    currentBid: subasta.precioBase,
-    endDate: subasta.fechaInicio, // Ajustar según tu modelo de datos
-    image: 'https://via.placeholder.com/300x200?text=Subasta' // Imagen por defecto
-  }));
-
-  const filteredProperties = mappedSubastas.filter((property) => {
-    if (!property) return false;
-    //console.log("ID que se pasa al botón:", property.id)
-
-    const categoryMatch = selectedCategory === 'Todas' || property.category === selectedCategory;
-    const searchMatch = 
-      property.title?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-      (property.description?.toLowerCase() || '').includes(searchTerm.toLowerCase());
-    const statusMatch = selectedStatus === 'Todas' || property.status === selectedStatus;
-    return categoryMatch && searchMatch && statusMatch;
-  });
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(amount || 0);
@@ -106,6 +78,33 @@ const SubastasVistaGeneral = () => {
     if (!desc) return 'Descripción no disponible';
     return desc.length > 100 ? `${desc.substring(0, 100)}...` : desc;
   };
+
+  const mappedSubastas = subastas.map(subasta => {
+    const producto = productos.find(p => p.idProducto === subasta.idProducto);
+
+    return {
+      id: subasta.idSubasta,
+      title: subasta.nombre,
+      description: subasta.descripcion,
+      category: subasta.tipoSubasta,
+      status: subasta.estado,
+      currentBid: subasta.precioBase,
+      endDate: subasta.fechaInicio,
+      image: producto?.imagenRuta
+        ? `http://localhost:5101${producto.imagenRuta}`
+        : 'https://via.placeholder.com/300x200?text=Subasta'
+    };
+  });
+
+  const filteredProperties = mappedSubastas.filter((property) => {
+    if (!property) return false;
+    const categoryMatch = selectedCategory === 'Todas' || property.category === selectedCategory;
+    const searchMatch = 
+      property.title?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      (property.description?.toLowerCase() || '').includes(searchTerm.toLowerCase());
+    const statusMatch = selectedStatus === 'Todas' || property.status === selectedStatus;
+    return categoryMatch && searchMatch && statusMatch;
+  });
 
   if (loading) {
     return (
@@ -125,30 +124,27 @@ const SubastasVistaGeneral = () => {
       </Container>
     );
   }
- 
+
   return (
-    <Container className="mt-5 pt-5"> {/* Añadido margen superior */}
-      {/* Header con título y botón */}
+    <Container className="mt-5 pt-5">
       <Row className="mb-4 align-items-center">
         <Col md={8}>
           <h2 className="page-title"> Subastas Disponibles</h2>
           <p className="text-muted">Explora las mejores oportunidades en subastas exclusivas</p>
         </Col>
         <Col md={4} className="text-end">
-        {esSubastador && (
-          <Button 
-            variant="primary" 
-            onClick={() => navigate('/crear-subasta')}
-            className="create-auction-btn"
-          >
-            <i className="bi bi-plus-lg me-2"></i>Crear Subasta
-          </Button>
-        )}
+          {esSubastador && (
+            <Button 
+              variant="primary" 
+              onClick={() => navigate('/crear-subasta')}
+              className="create-auction-btn"
+            >
+              <i className="bi bi-plus-lg me-2"></i>Crear Subasta
+            </Button>
+          )}
         </Col>
       </Row>
 
-
-      {/* Filtros */}
       <Card className="mb-4 filter-card">
         <Card.Body>
           <Row>
@@ -167,23 +163,20 @@ const SubastasVistaGeneral = () => {
                 </Form.Select>
               </Form.Group>
             </Col>
-            
             <Col md={4}>
               <Form.Group>
                 <Form.Label>Estado</Form.Label>
                 <Form.Select 
-  value={selectedStatus} 
-  onChange={handleStatusChange}
-  className="filter-select"
->
-  {statuses.map((status, idx) => (
-    <option key={idx} value={status.value}>{status.label}</option>
-  ))}
-</Form.Select>
-
+                  value={selectedStatus} 
+                  onChange={handleStatusChange}
+                  className="filter-select"
+                >
+                  {statuses.map((status, idx) => (
+                    <option key={idx} value={status.value}>{status.label}</option>
+                  ))}
+                </Form.Select>
               </Form.Group>
             </Col>
-            
             <Col md={4}>
               <Form.Group>
                 <Form.Label>Buscar</Form.Label>
@@ -204,7 +197,6 @@ const SubastasVistaGeneral = () => {
         </Card.Body>
       </Card>
 
-      {/* Listado de subastas */}
       {filteredProperties.length > 0 ? (
         <Row xs={1} md={2} lg={3} className="g-4">
           {filteredProperties.map((property) => (
@@ -254,9 +246,7 @@ const SubastasVistaGeneral = () => {
                         to={`/properties/${property.id}`} 
                         variant="outline-primary"
                         className="view-btn"
-                        
                       >
-                        
                         <i className="bi bi-eye me-2"></i>Ver detalles
                       </Button>
                     </div>

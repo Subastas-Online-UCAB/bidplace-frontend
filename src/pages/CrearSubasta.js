@@ -48,7 +48,7 @@ const CrearSubasta = () => {
         const userId = response.data.id;
         setFormData(prev => ({ ...prev, idUsuario: userId }));
 
-        const responseProductos = await axios.get('http://localhost:5118/productos/api/Productos', {
+        const responseProductos = await axios.get('http://localhost:5118/productos/api/ProductosControlador', {
           headers: {
             Authorization: `Bearer ${keycloak.token}`
           }
