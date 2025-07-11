@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Row, Col, Button, Table } from 'react-bootstrap';
+import { Container, Row, Col, Button, Table, Alert } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import keycloak from '../keycloak';
@@ -7,6 +7,9 @@ import keycloak from '../keycloak';
 const Producto = () => {
   const [products, setProducts] = useState([]);
   const navigate = useNavigate();
+  const [mensaje, setMensaje] = useState('');
+const [tipoMensaje, setTipoMensaje] = useState(''); // 'success' o 'error'
+
 
   useEffect(() => {
     const fetchProductos = async () => {
@@ -41,7 +44,7 @@ const Producto = () => {
     fetchProductos();
   }, []);
 
-  const handleDelete = async (id) => {
+const handleDelete = async (id) => {
   try {
     const email = keycloak.tokenParsed?.email;
     if (!email) {
@@ -49,7 +52,6 @@ const Producto = () => {
       return;
     }
 
-    // Obtener el ID del usuario
     const userResponse = await axios.get(`http://localhost:5118/usuarios/api/User/by-email?email=${email}`, {
       headers: {
         Authorization: `Bearer ${keycloak.token}`
@@ -58,19 +60,27 @@ const Producto = () => {
 
     const userId = userResponse.data.id;
 
-    // Llamar al endpoint DELETE con id en la ruta y usuarioId como query
     await axios.delete(`http://localhost:5118/productos/api/ProductosControlador/eliminar/${id}?usuarioId=${userId}`, {
       headers: {
         Authorization: `Bearer ${keycloak.token}`
       }
     });
 
-    // Actualizar el estado de productos
-    setProducts(prevProducts => prevProducts.filter(product => product.id !== id));
+    setMensaje('✅ Producto eliminado exitosamente.');
+    setTipoMensaje('success');
+
+    // Esperar 1.5 segundos y recargar
+    setTimeout(() => {
+      window.location.reload();
+    }, 1500);
+
   } catch (error) {
     console.error('Error al eliminar el producto:', error);
+    setMensaje('❌ No se pudo eliminar el producto.');
+    setTipoMensaje('danger');
   }
 };
+
 
   return (
     <Container className="pt-5 mt-5 mb-5">
@@ -81,6 +91,11 @@ const Producto = () => {
           </Button>
         </Col>
       </Row>
+      {mensaje && (
+  <Alert variant={tipoMensaje} onClose={() => setMensaje('')} dismissible>
+    {mensaje}
+  </Alert>
+)}
 
       <Table striped bordered hover>
         <thead>

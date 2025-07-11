@@ -202,11 +202,21 @@ bidAudio.volume = 0.5; // volumen moderado
       return;
     }
 
+      const montoIngresado = Number(bidAmount);
+const montoMinimoPermitido = highestBid + property.incrementoMinimo;
+
+if (montoIngresado < montoMinimoPermitido) {
+  alert(`La puja debe ser al menos $${montoMinimoPermitido}`);
+  return;
+}
+
     const bidData = {
       subastaId: id,
       usuarioId: email,
       monto: Number(bidAmount)
     };
+
+  
 
     try {
       const response = await axios.post('http://localhost:5118/pujas/api/Pujas/registrarPuja', bidData, {
