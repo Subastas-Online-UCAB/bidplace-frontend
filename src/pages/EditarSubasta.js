@@ -11,7 +11,7 @@ const categories = [
 ];
 
 const EditarSubasta = () => {
-  const { id } = useParams(); // id de la subasta
+  const { id } = useParams();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -29,35 +29,43 @@ const EditarSubasta = () => {
     idProducto: ''
   });
 
-  const [productosDisponibles] = useState([
-    { id: '3fa85f64-5717-4562-b3fc-2c963f66afa6', nombre: 'Laptop Dell Inspiron' },
-    { id: '3fa85f64-5717-4562-b3fc-2c963f66afa3', nombre: 'iPhone 13 Pro Max' },
-    { id: '3fa85f64-5717-4562-b3fc-2c963f66afa2', nombre: 'Guitarra Fender Stratocaster' }
-  ]);
-
+  const [productosDisponibles, setProductosDisponibles] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
 
-  // Obtener ID usuario
+  // Cargar ID de usuario y productos del usuario
   useEffect(() => {
-    const fetchUserId = async () => {
+    const fetchDatosUsuarioYProductos = async () => {
       try {
         const email = keycloak.tokenParsed?.email;
-        const res = await axios.get(`http://localhost:5118/usuarios/api/User/by-email?email=${email}`, {
+        if (!email) return;
+
+        // Obtener ID del usuario
+        const userRes = await axios.get(`http://localhost:5118/usuarios/api/User/by-email?email=${email}`, {
           headers: { Authorization: `Bearer ${keycloak.token}` }
         });
-        setFormData(prev => ({ ...prev, idUsuario: res.data.id }));
+
+        const userId = userRes.data.id;
+        setFormData(prev => ({ ...prev, idUsuario: userId }));
+
+        // Obtener productos del usuario
+        const productosRes = await axios.get('http://localhost:5118/productos/api/ProductosControlador', {
+          headers: { Authorization: `Bearer ${keycloak.token}` }
+        });
+
+        const productosFiltrados = productosRes.data.filter(p => p.idUsuario === userId);
+        setProductosDisponibles(productosFiltrados);
       } catch (err) {
-        console.error("Error al obtener usuario:", err);
-        setError("Error al obtener el usuario.");
+        console.error("Error al obtener usuario o productos:", err);
+        setError("Error al obtener los productos del usuario.");
       }
     };
 
-    fetchUserId();
+    fetchDatosUsuarioYProductos();
   }, []);
 
-  // Cargar datos de subasta
+  // Cargar datos de la subasta actual
   useEffect(() => {
     const fetchSubasta = async () => {
       try {
@@ -66,12 +74,11 @@ const EditarSubasta = () => {
         });
 
         const subasta = res.data;
-        console.log(subasta);
         setFormData({
           nombre: subasta.titulo,
           descripcion: subasta.descripcion,
           precioBase: subasta.precioBase,
-          duracion: parseInt(subasta.duracion), // formato: "1.00:00:00"
+          duracion: parseInt(subasta.duracion),
           condicionParticipacion: subasta.condicionParticipacion,
           fechaInicio: subasta.fechaInicio ? subasta.fechaInicio.slice(0, 10) : '',
           incrementoMinimo: subasta.incrementoMinimo,
@@ -96,45 +103,45 @@ const EditarSubasta = () => {
   };
 
   const seleccionarProducto = (producto) => {
-    setFormData(prev => ({ ...prev, idProducto: producto.id }));
+    setFormData(prev => ({ ...prev, idProducto: producto.idProducto }));
     setShowModal(false);
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  try {
-    await axios.put(
-      'http://localhost:5118/subastas/api/Subastas/editar',
-      {
-        subastaId: id,
-        usuarioId: formData.idUsuario,
-        titulo: formData.nombre,
-        descripcion: formData.descripcion,
-        fechaCierre: new Date(formData.fechaInicio).toISOString(),
-        precioBase: parseFloat(formData.precioBase),
-        duracion: `${formData.duracion}.00:00:00`,
-        condicionParticipacion: formData.condicionParticipacion,
-        incrementoMinimo: parseFloat(formData.incrementoMinimo),
-        precioReserva: parseFloat(formData.precioReserva),
-        tipoSubasta: formData.tipoSubasta,
-        productoId: formData.idProducto
-      },
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${keycloak.token}`
+    try {
+      await axios.put(
+        'http://localhost:5118/subastas/api/Subastas/editar',
+        {
+          subastaId: id,
+          usuarioId: formData.idUsuario,
+          titulo: formData.nombre,
+          descripcion: formData.descripcion,
+          fechaCierre: new Date(formData.fechaInicio).toISOString(),
+          precioBase: parseFloat(formData.precioBase),
+          duracion: `${formData.duracion}.00:00:00`,
+          condicionParticipacion: formData.condicionParticipacion,
+          incrementoMinimo: parseFloat(formData.incrementoMinimo),
+          precioReserva: parseFloat(formData.precioReserva),
+          tipoSubasta: formData.tipoSubasta,
+          productoId: formData.idProducto
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${keycloak.token}`
+          }
         }
-      }
-    );
+      );
 
-    setSuccess(true);
-    setTimeout(() => navigate('/mis-subastas'), 1500);
-  } catch (err) {
-    console.error(err);
-    setError("Error al actualizar la subasta.");
-  }
-};
+      setSuccess(true);
+      setTimeout(() => navigate('/mis-subastas'), 1500);
+    } catch (err) {
+      console.error(err);
+      setError("Error al actualizar la subasta.");
+    }
+  };
 
   return (
     <Container className="pt-5 mt-5 mb-5">
@@ -148,12 +155,12 @@ const EditarSubasta = () => {
             <Form.Label>Nombre</Form.Label>
             <Form.Control name="nombre" value={formData.nombre} onChange={handleChange} required />
           </Col>
-           <Col md={6}>
+          <Col md={6}>
             <Form.Label>Tipo de Subasta</Form.Label>
-            <Form.Select 
-              name="tipoSubasta" 
-              value={formData.tipoSubasta} 
-              onChange={handleChange} 
+            <Form.Select
+              name="tipoSubasta"
+              value={formData.tipoSubasta}
+              onChange={handleChange}
               required
             >
               <option value="">Selecciona una categoría</option>
@@ -217,16 +224,20 @@ const EditarSubasta = () => {
           <Modal.Title>Seleccionar Producto</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <ul className="list-group">
-            {productosDisponibles.map((producto) => (
-              <li key={producto.id} className="list-group-item d-flex justify-content-between align-items-center">
-                {producto.nombre}
-                <Button variant="primary" size="sm" onClick={() => seleccionarProducto(producto)}>
-                  Seleccionar
-                </Button>
-              </li>
-            ))}
-          </ul>
+          {productosDisponibles.length === 0 ? (
+            <p>No tienes productos registrados.</p>
+          ) : (
+            <ul className="list-group">
+              {productosDisponibles.map((producto) => (
+                <li key={producto.idProducto} className="list-group-item d-flex justify-content-between align-items-center">
+                  {producto.nombre}
+                  <Button variant="primary" size="sm" onClick={() => seleccionarProducto(producto)}>
+                    Seleccionar
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          )}
         </Modal.Body>
       </Modal>
     </Container>

@@ -63,29 +63,37 @@ function CrearProducto() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    const producto = {
-      nombre: formData.nombre,
-      descripcion: formData.descripcion,
-      tipo: formData.tipo,
-      cantidad: parseInt(formData.cantidad),
-      idUsuario: idUsuario
-    };
+  const form = new FormData();
+  form.append('Nombre', formData.nombre);
+  form.append('Descripcion', formData.descripcion);
+  form.append('Tipo', formData.tipo);
+  form.append('Cantidad', parseInt(formData.cantidad));
+  form.append('IdUsuario', idUsuario);
 
-    try {
-      const response = await axios.post('http://localhost:5118/productos/api/Productos', producto, {
+  if (fileInputRef.current.files[0]) {
+    form.append('Imagen', fileInputRef.current.files[0]);
+  }
+
+  try {
+    const response = await axios.post(
+      'http://localhost:5118/productos/api/ProductosControlador',
+      form,
+      {
         headers: {
-          Authorization: `Bearer ${keycloak.token}`
-        }
-      });
+      Authorization: `Bearer ${keycloak.token}`, // ✅ NO pongas Content-Type manualmente
+    },
+      }
+    );
 
-      alert('Producto creado correctamente');
-    } catch (error) {
-      console.error('Error al crear el producto:', error);
-      alert('Error al crear el producto');
-    }
-  };
+    alert('Producto creado correctamente');
+  } catch (error) {
+    console.error('Error al crear el producto:', error);
+    alert('Error al crear el producto');
+  }
+};
+
 
   return (
     <div className="container my-5">

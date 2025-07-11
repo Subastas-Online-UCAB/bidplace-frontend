@@ -25,7 +25,7 @@ const Producto = () => {
 
         const userId = userResponse.data.id;
 
-        const productosResponse = await axios.get('http://localhost:5118/productos/api/Productos', {
+        const productosResponse = await axios.get('http://localhost:5118/productos/api/ProductosControlador', {
           headers: {
             Authorization: `Bearer ${keycloak.token}`
           }
@@ -42,18 +42,35 @@ const Producto = () => {
   }, []);
 
   const handleDelete = async (id) => {
-    try {
-      await axios.delete(`http://localhost:5118/productos/api/Productos/${id}`, {
-        headers: {
-          Authorization: `Bearer ${keycloak.token}`
-        }
-      });
-
-      setProducts(prevProducts => prevProducts.filter(product => product.id !== id));
-    } catch (error) {
-      console.error('Error al eliminar el producto:', error);
+  try {
+    const email = keycloak.tokenParsed?.email;
+    if (!email) {
+      console.error('Email no encontrado en el token');
+      return;
     }
-  };
+
+    // Obtener el ID del usuario
+    const userResponse = await axios.get(`http://localhost:5118/usuarios/api/User/by-email?email=${email}`, {
+      headers: {
+        Authorization: `Bearer ${keycloak.token}`
+      }
+    });
+
+    const userId = userResponse.data.id;
+
+    // Llamar al endpoint DELETE con id en la ruta y usuarioId como query
+    await axios.delete(`http://localhost:5118/productos/api/ProductosControlador/eliminar/${id}?usuarioId=${userId}`, {
+      headers: {
+        Authorization: `Bearer ${keycloak.token}`
+      }
+    });
+
+    // Actualizar el estado de productos
+    setProducts(prevProducts => prevProducts.filter(product => product.id !== id));
+  } catch (error) {
+    console.error('Error al eliminar el producto:', error);
+  }
+};
 
   return (
     <Container className="pt-5 mt-5 mb-5">
@@ -98,7 +115,7 @@ const Producto = () => {
                 <Button
                   variant="danger"
                   className="btn-sm"
-                  onClick={() => handleDelete(product.id)}
+                  onClick={() => handleDelete(product.idProducto)}
                 >
                   Eliminar
                 </Button>

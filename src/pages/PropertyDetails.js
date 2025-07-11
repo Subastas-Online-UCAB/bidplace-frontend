@@ -17,7 +17,8 @@ const PropertyDetails = () => {
   const [property, setProperty] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [mainImage, setMainImage] = useState(subastaImg);
+  const [mainImage, setMainImage] = useState('');
+
   const [showModal, setShowModal] = useState(false);
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [formValues, setFormValues] = useState({
@@ -39,25 +40,56 @@ bidAudio.volume = 0.5; // volumen moderado
 
   const isAuctionActive = property?.estado === 'Active';
 
-  const fetchSubasta = async () => {
-    try {
-      const response = await axios.get(`http://localhost:5118/subastas/api/Subastas/buscar/${id}`, {
-        headers: { Authorization: `Bearer ${keycloak.token}` }
-      });
-      setProperty(response.data);
-    } catch (error) {
-      setError('No se pudo cargar la subasta.');
-      console.error(error);
-    } finally {
-      setLoading(false);
+ const fetchSubasta = async () => {
+  try {
+    const response = await axios.get(`http://localhost:5118/subastas/api/Subastas/buscar/${id}`, {
+      headers: { Authorization: `Bearer ${keycloak.token}` }
+    });
+
+    console.log(response);
+    setProperty(response.data);
+
+    // 🔽 Declarar y llamar a fetchProducto aquí
+    const fetchProducto = async (idProducto) => {
+      try {
+        const response = await axios.get(`http://localhost:5118/productos/api/ProductosControlador/buscar/${idProducto}`, {
+          headers: { Authorization: `Bearer ${keycloak.token}` }
+        });
+
+        const imagenUrl = response.data.imagenRuta
+          ? `http://localhost:5101${response.data.imagenRuta}`
+          : null;
+
+          console.log(imagenUrl);
+
+          console.log(response);
+        if (imagenUrl) setMainImage(imagenUrl);
+      } catch (error) {
+        console.error('Error al obtener el producto:', error);
+      }
+    };
+
+    if (response.data.idProducto) {
+      await fetchProducto(response.data.idProducto);
     }
-  };
+
+  } catch (error) {
+    setError('No se pudo cargar la subasta.');
+    console.error(error);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const fetchPujas = async () => {
   try {
     const response = await axios.get(`http://localhost:5118/pujas/api/Pujas/subasta/${id}`, {
       headers: { Authorization: `Bearer ${keycloak.token}` }
     });
+    console.log(response.data);
+    console.log("🧩 id desde URL que NO funciona:", id);
+
     const enriched = await enrichPujasWithUserNames(response.data);
     // ⬇️ AÑADE esta línea para ordenar descendente por fecha
     console.log("PUJAS ENRIQUECIDAS:", enriched);
@@ -242,11 +274,6 @@ bidAudio.volume = 0.5; // volumen moderado
       <div className="property-details-content">
         <div className="property-details-left">
           <img src={mainImage} alt="Subasta Detalle" className="property-details-image" />
-          <div className="thumbnail-container">
-            {[subastaImg1, subastaImg2, subastaImg3, subastaImg4, subastaImg5].map((img, idx) => (
-              <img key={idx} src={img} alt={`Subasta mini ${idx + 1}`} className="thumbnail-image" onClick={() => setMainImage(img)} />
-            ))}
-          </div>
           <button className="more-info-button" onClick={handleMoreInfoClick}>Más información</button>
         </div>
 
