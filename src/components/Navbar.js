@@ -105,7 +105,7 @@ const NavigationBar = () => {
             <Nav.Link as={Link} to="/soporte" onClick={(e) => handleNavClick(e, "/soporte")} className="text-dark fw-medium mx-2">
               Soporte
             </Nav.Link>
-            <Nav.Link as={Link} to="/historial-pujas">Historial de Pujas</Nav.Link>
+            
 
           </Nav>
 
@@ -131,8 +131,11 @@ const NavigationBar = () => {
 
                 {isPostor && (
                   <>
-                    <Dropdown.Item onClick={(e) => handleNavClick(e, "/pagos")}>Gestionar métodos de pago</Dropdown.Item>
+                    <Dropdown.Item onClick={(e) => handleNavClick(e, "/metodos-pago")}>Gestionar métodos de pago</Dropdown.Item>                
+                    <Dropdown.Item onClick={(e) => handleNavClick(e, "/subastas-ganadas")}>Subastas Ganadas</Dropdown.Item>
                     <Dropdown.Item onClick={(e) => handleNavClick(e, "/mis-reclamos")}>Mis Reclamos</Dropdown.Item>
+                    <Dropdown.Item onClick={(e) => handleNavClick(e, "/historial-pujas")}>Mi Historial de Subastas / Pujas</Dropdown.Item>
+                    
                   </>
                 )}
 
