@@ -24,7 +24,11 @@ import MisReclamos from './pages/MisReclamos'
 import GestionReclamos from './pages/GestionReclamos'
 import EditarProducto from './pages/EditarProducto';
 import HistorialActividad from './pages/HistorialActividad';
-import HistorialPujas from './pages/HistorialPujas'
+import HistorialPujas from './pages/HistorialPujas';
+import PaymentMethods from './pages/PaymentMethods';
+import PagarSubasta from './pages/PagarSubasta';
+import SubastasGanadas from './pages/SubastasGanadas'
+
 
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -70,6 +74,10 @@ function App() {
               <Route path="/productos/editar/:id" element={<EditarProducto />} />
               <Route path="/historial" element={<HistorialActividad />} />
               <Route path="/historial-pujas" element={<HistorialPujas />} />
+              <Route path="/metodos-pago" element={<PaymentMethods />} />
+              <Route path="/pagar-subasta/:idSubasta" element={<PagarSubasta />} />
+              <Route path="/subastas-ganadas" element={<SubastasGanadas />} />
+
 
 
 
